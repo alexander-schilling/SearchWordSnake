@@ -7,14 +7,16 @@ package BestPackage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Stack;
 import java.util.List;
 
 public class SopaLetras {
 
     // Variables nativas
-    private List<String> soup = new ArrayList<>();
-    private List<String> words = new ArrayList<>();
-    private List<SopaLetras.Palabra> data = new ArrayList<>();
+    private List<String> soup = new ArrayList();
+    private List<String> words = new ArrayList();
+    private final List<List<Integer>> estados = new ArrayList();
+    private final List<SopaLetras.Palabra> data = new ArrayList();
 
     // Constructores
     public SopaLetras() {
@@ -29,128 +31,92 @@ public class SopaLetras {
 
     public class Palabra {
 
-        private String word;
+        private final String word;
         private boolean inSoup;
-        private List<List<Integer>> coords = new ArrayList<>();
-        private List<List<Integer>> temp = new ArrayList<>();
+        private final Stack<List<Integer>> open = new Stack();
+        private final List<List<Integer>> closed = new ArrayList();
 
-        public Palabra(String word) {
+        private Palabra(String word) {
             this.word = word;
         }
 
         // Métodos Privados
         private boolean superior(int x, int y, int i) {
             return x - 1 >= 0
-                    && temp.contains(Arrays.asList(x - 1, y)) == false
+                    && closed.contains(Arrays.asList(x - 1, y)) == false
                     && soup.get(x - 1).charAt(y) == word.charAt(i);
         }
 
         private boolean right(int x, int y, int i) {
             return y + 1 < soup.get(0).length()
-                    && temp.contains(Arrays.asList(x, y + 1)) == false
+                    && closed.contains(Arrays.asList(x, y + 1)) == false
                     && soup.get(x).charAt(y + 1) == word.charAt(i);
         }
 
         private boolean inferior(int x, int y, int i) {
             return x + 1 < soup.size()
-                    && temp.contains(Arrays.asList(x + 1, y)) == false
+                    && closed.contains(Arrays.asList(x + 1, y)) == false
                     && soup.get(x + 1).charAt(y) == word.charAt(i);
         }
 
         private boolean left(int x, int y, int i) {
             return y - 1 >= 0
-                    && temp.contains(Arrays.asList(x, y - 1)) == false
+                    && closed.contains(Arrays.asList(x, y - 1)) == false
                     && soup.get(x).charAt(y - 1) == word.charAt(i);
         }
 
-        private boolean noSolution(int x, int y, int i) {
-            return (!superior(x, y, i) && !right(x, y, i)
-                    && !inferior(x, y, i) && !left(x, y, i));
-        }
-
-        private boolean forms(int x, int y, int i) {
-            if (i < word.length() && noSolution(x, y, i)) {
-                temp.remove(temp.size() - 1);
-                return formr(x + 1, y, i - 1);
-            } else if (i < word.length()) {
-                temp.add(Arrays.asList(x, y));
-                if (superior(x, y, i)) {
-                    return forms(x - 1, y, i + 1);
+        private boolean form() {
+            while (open.empty() == false) {
+                // remover el primer estado X de la lista open
+                if (open.peek().get(2) == word.length() - 1) {
+                    return true;
                 } else {
-                    temp.remove(temp.size() - 1);
-                    return formr(x, y, i);
+                    // generar el conjunto de sucesores del estado X
+                    // agregar el estado X al conjunto closed
+                    // eliminar sucesores que ya están en open o en closed
+                    // agregar el resto de los sucesores al principio de open
+                    int x = open.peek().get(0);
+                    int y = open.peek().get(1);
+                    int i = open.peek().get(2);
+                    if (superior(x, y, i + 1)) {
+                        open.push(Arrays.asList(x - 1, y, i + 1));
+                        if (closed.contains(Arrays.asList(x, y)) == false) {
+                            closed.add(Arrays.asList(x, y));
+                        }
+                    } else if (right(x, y, i + 1)) {
+                        open.push(Arrays.asList(x, y + 1, i + 1));
+                        if (closed.contains(Arrays.asList(x, y)) == false) {
+                            closed.add(Arrays.asList(x, y));
+                        }
+                    } else if (inferior(x, y, i + 1)) {
+                        open.push(Arrays.asList(x + 1, y, i + 1));
+                        if (closed.contains(Arrays.asList(x, y)) == false) {
+                            closed.add(Arrays.asList(x, y));
+                        }
+                    } else if (left(x, y, i + 1)) {
+                        open.push(Arrays.asList(x, y - 1, i + 1));
+                        if (closed.contains(Arrays.asList(x, y)) == false) {
+                            closed.add(Arrays.asList(x, y));
+                        }
+                    } else {
+                        if (closed.contains(Arrays.asList(x, y)) == false) {
+                            closed.add(Arrays.asList(x, y));
+                        }
+                        open.pop();
+                    }
                 }
-            } else {
-                temp.add(Arrays.asList(x, y));
-                coords = temp;
-                return true;
             }
-        }
-
-        private boolean formr(int x, int y, int i) {
-            if (i < word.length() && noSolution(x, y, i)) {
-                temp.remove(temp.size() - 1);
-                return formi(x, y - 1, i - 1);
-            } else if (i < word.length()) {
-                temp.add(Arrays.asList(x, y));
-                if (right(x, y, i)) {
-                    return forms(x, y + 1, i + 1);
-                } else {
-                    temp.remove(temp.size() - 1);
-                    return formi(x, y, i);
-                }
-            } else {
-                temp.add(Arrays.asList(x, y));
-                coords = temp;
-                return true;
-            }
-        }
-
-        private boolean formi(int x, int y, int i) {
-            if (i < word.length() && noSolution(x, y, i)) {
-                temp.remove(temp.size() - 1);
-                return forml(x - 1, y, i - 1);
-            } else if (i < word.length()) {
-                temp.add(Arrays.asList(x, y));
-                if (inferior(x, y, i)) {
-                    return forms(x + 1, y, i + 1);
-                } else {
-                    temp.remove(temp.size() - 1);
-                    return forml(x, y, i);
-                }
-            } else {
-                temp.add(Arrays.asList(x, y));
-                coords = temp;
-                return true;
-            }
-        }
-
-        private boolean forml(int x, int y, int i) {
-            if (i < word.length() && noSolution(x, y, i)) {
-                temp.remove(temp.size() - 1); // not really necessary
-                return false;
-            } else if (i < word.length()) {
-                temp.add(Arrays.asList(x, y));
-                if (left(x, y, i)) {
-                    return forms(x, y - 1, i + 1);
-                } else {
-                    temp.remove(temp.size() - 1);
-                    return forms(x, y, i);
-                }
-            } else {
-                temp.add(Arrays.asList(x, y));
-                coords = temp;
-                return true;
-            }
+            return false;
         }
 
         private boolean search() {
             boolean tempBool = false;
+            eliminarIncorrectos();
             for (int i = 0; i < soup.size(); i++) {
                 for (int j = 0; j < soup.get(0).length(); j++) {
                     if (soup.get(i).charAt(j) == word.charAt(0)) {
-                        temp = new ArrayList<>();
-                        tempBool = forms(i, j, 1);
+                        open.push(Arrays.asList(i, j, 0));
+                        tempBool = form();
                         if (tempBool) {
                             return true;
                         }
@@ -160,9 +126,22 @@ public class SopaLetras {
             return tempBool;
         }
 
-        public void isInSoup() {
-            boolean isIt = search();
-            if (isIt) {
+        private void eliminarIncorrectos() {
+            int i = 0;
+            while (i < estados.size()) {
+                int x = estados.get(i).get(0);
+                int y = estados.get(i).get(1);
+                if (word.indexOf(soup.get(x).charAt(y)) >= 0) {
+                    i += 1;
+                } else {
+                    closed.add(Arrays.asList(x, y));
+                    i += 1;
+                }
+            }
+        }
+
+        private void isInSoup() {
+            if (inSoup) {
                 System.out.println("La palabra " + word
                         + " está en la sopa.");
             } else {
@@ -171,53 +150,28 @@ public class SopaLetras {
             }
         }
 
-        public void printCoords() {
+        private void printCoords() {
+            Stack<List<Integer>> copy = new Stack<>();
+            copy.addAll(open);
             System.out.print(word + ": ");
-            if (coords.isEmpty()) {
+            if (copy.empty() == true) {
                 System.out.print("No está en la sopa.");
             }
-            for (int i = 0; i < coords.size(); i++) {
-                System.out.print(Arrays.toString(coords.get(i).toArray()));
+            while (copy.empty() == false) {
+                System.out.print(Arrays.toString(copy.peek().toArray()));
+                copy.pop();
                 System.out.print(" ");
             }
             System.out.println();
         }
 
-        public void printWord() {
-            System.out.println(word);
-        }
-
-        public void printTemp() {
-            System.out.print(word + ": ");
-            temp.forEach(System.out::println);
-        }
-
-        public void editNamesCoords(List<List<Integer>> coords) {
-            this.coords = coords;
-        }
-
-        public void editInSoup(boolean inSoup) {
-            this.inSoup = inSoup;
-        }
-
-        public void editCoordsList(List<List<Integer>> temp) {
-            this.temp = temp;
-        }
-
-        public List<List<Integer>> getCoords() {
-            return coords;
-        }
-
-        public boolean getInSoup() {
-            return inSoup;
-        }
-
-        public List<List<Integer>> getCoordsList() {
-            return temp;
+        private void executeSolution() {
+            inSoup = search();
         }
     }
 
     // Métodos Privados
+    // Métodos Públicos
     public void crearPalabras() {
         for (int i = 0; i < words.size(); i++) {
             String w = words.get(i);
@@ -226,40 +180,37 @@ public class SopaLetras {
         }
     }
 
-    // Métodos Públicos
+    public void crearEstados() {
+        for (int i = 0; i < soup.size(); i++) {
+            for (int j = 0; j < soup.get(0).length(); j++) {
+                estados.add(Arrays.asList(i, j));
+            }
+        }
+    }
+
+    public void printEstados() {
+        for (int i = 0; i < estados.size(); i++) {
+            System.out.print(Arrays.toString(estados.get(i).toArray()));
+            System.out.print(" ");
+        }
+        System.out.println();
+    }
+
     public void printSolutionsCoords() {
-        for (int i = 0; i < words.size(); i++) {
+        for (int i = 0; i < data.size(); i++) {
             data.get(i).printCoords();
         }
     }
 
     public void printSolutions() {
-        for (int i = 0; i < words.size(); i++) {
+        for (int i = 0; i < data.size(); i++) {
             data.get(i).isInSoup();
         }
     }
 
-    public void editSoup(List<String> soup) {
-        this.soup = soup;
-    }
-
-    public void editWords(List<String> words) {
-        this.words = words;
-    }
-
-    public void editData(List<Palabra> data) {
-        this.data = data;
-    }
-
-    public List<String> getSoup() {
-        return soup;
-    }
-
-    public List<String> getWords() {
-        return words;
-    }
-
-    public List<Palabra> getData() {
-        return data;
+    public void init() {
+        for (int i = 0; i < data.size(); i++) {
+            data.get(i).executeSolution();
+        }
     }
 }

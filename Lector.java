@@ -67,7 +67,7 @@ public class Lector {
         }
     }
 
-    public List<String> setNames() {
-        return getFileData("los nombres a encontrar");
+    public List<String> setWords() {
+        return getFileData("las palabras a encontrar");
     }
 }

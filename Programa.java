@@ -12,9 +12,11 @@ import java.util.Scanner;
 public class Programa {
 
     public static void main(String args[]) {
-        Lector lector = new Lector();
-        SopaLetras sopa1 = new SopaLetras();
+        Lector l = new Lector();
+        SopaLetras sopa1 = new SopaLetras(l.setSoup(), l.setWords());
+        sopa1.crearEstados();
         sopa1.crearPalabras();
+        sopa1.init();
         sopa1.printSolutions();
         sopa1.printSolutionsCoords();
     }

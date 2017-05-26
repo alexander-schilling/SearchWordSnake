@@ -7,7 +7,6 @@
  que las palabras estén sin sus signos de puntuación correspondientes.
  Autor: Alexander Carlos Andrés Schilling Miranda.
  Versión: 1.0 | Fecha: 26/05/2017 */
-package BestPackage;
 
 // BLOQUE DE IMPORTACIÓN
 import java.util.ArrayList;
@@ -20,10 +19,10 @@ public class SopaLetras {
 
     // Variables nativas
     private final int id;
-    private List<String> soup = new ArrayList();
-    private List<String> words = new ArrayList();
-    private final List<List<Integer>> estados = new ArrayList();
-    private final List<SopaLetras.Palabra> data = new ArrayList();
+    private List<String> soup = new ArrayList<>();
+    private List<String> words = new ArrayList<>();
+    private final List<List<Integer>> estados = new ArrayList<>();
+    private final List<SopaLetras.Palabra> data = new ArrayList<>();
 
     // Constructores
     public SopaLetras() {
@@ -43,8 +42,8 @@ public class SopaLetras {
 
         private final String word;
         private boolean inSoup;
-        private final Stack<List<Integer>> open = new Stack();
-        private final List<List<Integer>> closed = new ArrayList();
+        private final Stack<List<Integer>> open = new Stack<>();
+        private final List<List<Integer>> closed = new ArrayList<>();
 
         private Palabra(String word) {
             this.word = word;
@@ -187,7 +186,7 @@ public class SopaLetras {
             if (list.isEmpty()) {
                 str += "Not in the puzzle.";
             } else {
-                str += "In the puzzle with coords: <";
+                str += "In the puzzle with coords: < ";
             }
             for (int i = 0; i < list.size(); i++) {
                 String x = String.valueOf(list.get(i).get(0) + 1);

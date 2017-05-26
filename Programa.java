@@ -8,7 +8,6 @@
  que las palabras estén sin sus signos de puntuación correspondientes.
  Autor: Alexander Carlos Andrés Schilling Miranda.
  Versión: 1.0 | Fecha: 26/05/2017 */
-package BestPackage;
 
 // BLOQUE DE IMPORTACIÓN
 import java.io.IOException;
